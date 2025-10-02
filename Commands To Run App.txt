@@ -45,6 +45,7 @@ db.users.find().pretty()
 
 
 // To Build and Run the Application with Docker Compose
+//Install Docker
 cd webapp3tier
 sudo systemctl stop mongod
 docker compose up --build
@@ -58,3 +59,5 @@ show dbs
 use loginApp
 show collections
 db.users.find().pretty()
+
+//To Clear All Entries

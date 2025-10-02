@@ -15,6 +15,7 @@ mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
+
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.log(err));
 
@@ -42,36 +43,21 @@ function readLoginsFile() {
   return JSON.parse(fileContent || "[]");
 }
 
-// --- Combined Login Endpoint ---
+/// --- Login Endpoint ---
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Read logins.json
-    let logins = readLoginsFile();
+    const user = await User.findOne({ email });
 
-    // Find user by email only
-    const existingUser = logins.find(u => u.email === email);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    if (existingUser) {
-      // Email exists → check password
-      if (existingUser.password === password) {
-        return res.status(200).json({ message: "Login successful" });
-      } else {
-        return res.status(401).json({ message: "Invalid password" });
-      }
+    if (user.password === password) {
+      return res.status(200).json({ message: "Login successful" });
     } else {
-      // Email does not exist → create new user
-
-      // Save to MongoDB
-      const newUser = new User({ email, password });
-      await newUser.save();
-
-      // Save to logins.json
-      logins.push({ email, password });
-      fs.writeFileSync(loginsPath, JSON.stringify(logins, null, 2), "utf8");
-
-      return res.status(201).json({ message: "User created and logged in" });
+      return res.status(401).json({ message: "Invalid password" });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -90,6 +76,11 @@ app.post("/register", async (req, res) => {
 
     const newUser = new User({ username, name, phone, email, password });
     await newUser.save();
+
+    // Also save to logins.json
+    const logins = readLoginsFile();
+    logins.push({ username, name, phone, email, password });
+    fs.writeFileSync(loginsPath, JSON.stringify(logins, null, 2), "utf8");
 
     return res.status(201).json({ message: "Registration successful" });
   } catch (err) {
