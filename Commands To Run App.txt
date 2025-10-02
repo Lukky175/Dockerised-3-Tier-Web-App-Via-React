@@ -46,7 +46,8 @@ db.users.find().pretty()
 
 // To Build and Run the Application with Docker Compose
 cd webapp3tier
-docker-compose up --build
+sudo systemctl stop mongod
+docker compose up --build
 
 // To stop the application
 docker-compose down

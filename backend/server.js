@@ -20,9 +20,13 @@ mongoose.connect(mongoURI, {
 
 // --- Schema & Model ---
 const UserSchema = new mongoose.Schema({
+  username: String,
+  name: String,
+  phone: String,
   email: String,
   password: String,
 });
+
 
 const User = mongoose.model("User", UserSchema);
 
@@ -73,6 +77,26 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// --- Register Endpoint ---
+app.post("/register", async (req, res) => {
+  const { username, name, phone, email, password } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    const newUser = new User({ username, name, phone, email, password });
+    await newUser.save();
+
+    return res.status(201).json({ message: "Registration successful" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 
 // --- Test route ---

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./Navbar.css";
 
 function Navbar() {
@@ -26,13 +27,13 @@ function Navbar() {
             <a href="">Contact</a>
           </li>
           <li>
-            <button onClick={() => (window.location.href = "#")}>
-              Login
-            </button>
+            <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+            Login
+            </Link>
           </li>
           <li>
-            <button onClick={() => (window.location.href = "#")}>
-              Register
+            <button>
+              <Link to="/register" style={{ textDecoration: "none", color: "inherit" }}>Register</Link>
             </button>
           </li>
         </ul>

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import "./Home.css";
+import { Link } from "react-router-dom";
 
-function Home() {
+import "./Login.css";
+
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -26,9 +28,9 @@ function Home() {
 
   return (
     <section className="login-section">
-      {/* Left Side: Login Form */}
-      <div className="form-box">
-        <div className="form-value">
+      {/* Login Form */}
+      <div className="login-form-box">
+        <div className="login-form-value">
           <form onSubmit={handleSubmit}>
             <h2>Login</h2>
 
@@ -63,11 +65,11 @@ function Home() {
               <a href="#">Forget Password?</a>
             </div>
 
-            <button type="submit">Login</button>
+            <button type="submit" id="loginButton">Login</button>
 
             <div className="register">
               <p>
-                Don't Have An Account? <a href="#">Register</a>
+                Don't Have An Account? <Link to="/register">Register</Link>
               </p>
             </div>
           </form>
@@ -77,4 +79,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Login;
