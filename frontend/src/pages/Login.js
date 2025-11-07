@@ -1,29 +1,37 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import "./Login.css";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();  // ✅ Add this line
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const res = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const res = await fetch("http://localhost:5000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await res.json();
-      alert(data.message);
-    } catch (err) {
-      console.error(err);
-      alert("Error saving data");
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      alert(data.message); // "Login successful"
+      navigate("/landingpage"); //It will Redirect only if backend says success
+    } else {
+      alert(data.message || "Invalid credentials");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Error connecting to server");
+  }
+};
 
 
   return (
