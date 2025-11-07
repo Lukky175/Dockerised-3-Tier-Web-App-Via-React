@@ -1,0 +1,4 @@
+multer pdf-parse @google/generative-ai dotenv
+
+
+npm install multer pdf-parse @google/generative-ai dotenv

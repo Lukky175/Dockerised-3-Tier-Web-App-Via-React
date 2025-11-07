@@ -44,9 +44,10 @@ db.users.find().pretty()
 
 
 
-// To Build and Run the Application with Docker Compose
-//Install Docker
-cd webapp3tier
+// To Build and Run the Application You must be on Linux Environment
+
+//First Install Docker Then Pull the repo
+cd Dockerised-3-Tier-Web-App-Via-React
 sudo systemctl stop mongod
 docker compose up --build
 

@@ -1,25 +1,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
+require("dotenv").config();
+const { GoogleGenAI } = require("@google/genai");
 
 const app = express();
-app.use(express.json()); // allows JSON body
-app.use(cors()); // allow frontend to call backend
+app.use(express.json());
+app.use(cors());
 
 // --- MongoDB Connection ---
 const mongoURI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/loginApp";
+mongoose
+  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.log("❌ MongoDB Error:", err));
 
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
-
-// --- Schema & Model ---
+// --- Schema ---
 const UserSchema = new mongoose.Schema({
   username: String,
   name: String,
@@ -27,75 +23,122 @@ const UserSchema = new mongoose.Schema({
   email: String,
   password: String,
 });
-
-
 const User = mongoose.model("User", UserSchema);
 
-// --- Path to logins.json ---
-const loginsPath = path.join(__dirname, "logins.json");
+// --- Gemini API Setup ---
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// --- Utility function to read logins.json ---
-function readLoginsFile() {
-  if (!fs.existsSync(loginsPath)) {
-    fs.writeFileSync(loginsPath, "[]", "utf8"); // Create empty file if not exists
-  }
-  const fileContent = fs.readFileSync(loginsPath, "utf8");
-  return JSON.parse(fileContent || "[]");
-}
+// --- Conversation History (in-memory) ---
+let conversationHistory = []; // keeps last few user-model exchanges
 
-/// --- Login Endpoint ---
+// --- Auth Routes ---
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
+    if (!user)
+      return res.status(404).json({ success: false, message: "User not found" });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (user.password === password) {
-      return res.status(200).json({ message: "Login successful" });
-    } else {
-      return res.status(401).json({ message: "Invalid password" });
-    }
+    if (user.password === password)
+      return res.status(200).json({
+        success: true,
+        message: "Login successful",
+        user: { username: user.username, email: user.email },
+      });
+    else
+      return res.status(401).json({ success: false, message: "Invalid password" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// --- Register Endpoint ---
 app.post("/register", async (req, res) => {
   const { username, name, phone, email, password } = req.body;
-
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    if (existingUser)
       return res.status(400).json({ message: "Email already exists" });
-    }
 
     const newUser = new User({ username, name, phone, email, password });
     await newUser.save();
 
-    // Also save to logins.json
-    const logins = readLoginsFile();
-    logins.push({ username, name, phone, email, password });
-    fs.writeFileSync(loginsPath, JSON.stringify(logins, null, 2), "utf8");
-
-    return res.status(201).json({ message: "Registration successful" });
+    res.status(201).json({ message: "Registration successful" });
   } catch (err) {
+    console.error("Registration error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
+// --- Summarize Endpoint ---
+app.post("/summarize", async (req, res) => {
+  try {
+    const { prompt, text } = req.body;
+    if (!text && !prompt) {
+      return res
+        .status(400)
+        .json({ error: "No text or prompt provided for summarization." });
+    }
 
+    // --- Add current user prompt/text to history ---
+    conversationHistory.push({ role: "User", prompt: prompt || "No prompt", text: text || "" });
+    if (conversationHistory.length > 8) conversationHistory.shift(); // keep recent 8 exchanges
 
-// --- Test route ---
+    // --- Build conversation context including model replies ---
+    const historyContext = conversationHistory
+      .map((entry, i) =>
+        entry.role === "Model"
+          ? `Model Response #${i + 1}: ${entry.text.slice(0, 300)}...`
+          : `User #${i + 1} Prompt: ${entry.prompt}\nText: ${
+              entry.text ? entry.text.slice(0, 300) + "..." : "No text"
+            }`
+      )
+      .join("\n\n");
+
+    // --- Construct final prompt for Gemini ---
+    const finalPrompt = `
+You are an academic summarizer specializing in summarizing research papers.
+Use the previous conversation messages for better context.
+
+--- Conversation History ---
+${historyContext}
+
+--- Current Request ---
+Summarize the following content and mention key details:
+
+Prompt: ${prompt || "No user prompt."}
+Text: ${text || "No text found."}
+--- END ---
+
+If no research content is found, check conversation history for context and respond normally to the user prompt.
+`;
+
+    // --- Send to Gemini ---
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: finalPrompt,
+    });
+    console.log(historyContext)
+    const summary =
+      response.text ||
+      "⚠️ No summary could be generated by the Gemini model.";
+
+    // --- Save model response in history ---
+    conversationHistory.push({ role: "Model", text: summary });
+    if (conversationHistory.length > 8) conversationHistory.shift();
+
+    res.json({ summary });
+  } catch (err) {
+    console.error("Gemini API error:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to summarize. Check Gemini API key or content." });
+  }
+});
+
+// --- Root Route ---
 app.get("/", (req, res) => {
   res.send("Backend is running ✅");
 });
 
-// --- Start server ---
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
-});
+// --- Start Server ---
+app.listen(5000, () => console.log("🚀 Server running on http://localhost:5000"));
