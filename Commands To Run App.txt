@@ -1,11 +1,16 @@
 //For Backend
 
+npm init -y (to install package.json)
 cd backend
-sudo systemctl start mongod
+sudo systemctl start mongod   //start mongodb
 node server.js
 
 
 // For Frontend
+npm install react-markdown
+npm install lucide-react
+
+
 
 cd webapp3tier
 cd backend
@@ -33,6 +38,13 @@ db.users.find().pretty()
 
 
 
+Status Code	Meaning
+200	OK (success)
+201	Created
+400	Bad Request
+401	Unauthorized
+404	Not Found
+500	Server Error
 
 
 
@@ -44,7 +56,8 @@ db.users.find().pretty()
 
 
 
-// To Build and Run the Application You must be on Linux Environment
+
+// To Build and Run the Application On docker You must be on Linux Environment
 
 //First Install Docker Then Pull the repo
 cd Dockerised-3-Tier-Web-App-Via-React

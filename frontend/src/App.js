@@ -1,5 +1,4 @@
 // ...existing code...
-import logo from './logo.svg';
 import './App.css';
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -7,6 +6,7 @@ import Navbar from "./NavigationBar/Navbar"; // import Navbar page
 import Login from "./pages/Login"; // import Login page
 import Register from "./pages/Register";
 import LandingPage from './landingpage/landingpage';
+import ProtectedRoute from "./RouteProtection/ProtectedRoute.js";
 
 function App() {
   return (
@@ -17,7 +17,14 @@ function App() {
           <Routes>
             <Route path="/" element={<Login />} />        {/* Default = Login */}
             <Route path="/register" element={<Register />} />
-            <Route path="/landingpage" element={<LandingPage />} /> 
+            <Route
+              path="/landingpage"
+              element={
+                <ProtectedRoute>
+                  <LandingPage />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </div>
       </Router>

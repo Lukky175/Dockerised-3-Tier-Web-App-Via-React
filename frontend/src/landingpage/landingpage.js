@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import "./landingpage.css";
+import SummaryDisplay from "./SummaryDisplay";
 
-// Import PDF.js via CDN dynamically
+
+//Here I Imported PDF.js via CDN dynamically.
 const pdfjsLibUrl = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js";
 const pdfWorkerUrl = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.worker.min.js";
 
@@ -92,14 +94,20 @@ function LandingPage() {
 
         <div className="chat-window">
           {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`chat-bubble ${msg.sender === "user" ? "user" : "ai"}`}
-            >
-              {msg.fileName && <p className="file-attachment">📎 {msg.fileName}</p>}
-              <p>{msg.text}</p>
-            </div>
-          ))}
+          <div
+          key={index}
+          className={`chat-bubble ${msg.sender === "user" ? "user" : "ai"}`}
+          >
+          {msg.fileName && <p className="file-attachment">📎 {msg.fileName}</p>}
+
+          {msg.sender === "ai" ? (
+            <SummaryDisplay summary={msg.text} />
+          ) : (
+            <p>{msg.text}</p>
+          )}
+        </div>
+      ))}
+
         </div>
 
         <form className="chat-input-area" onSubmit={handleSend}>

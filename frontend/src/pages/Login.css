@@ -10,7 +10,7 @@ section.login-section {
     box-sizing: border-box;
 }
 
-/* Left side: Login Form */
+/*Login Form */
 .login-form-box {
     position: relative;
     width: 410px;

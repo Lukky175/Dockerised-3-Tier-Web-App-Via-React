@@ -23,13 +23,14 @@ function Login() {
 
     if (res.ok && data.success) {
       alert(data.message); // "Login successful"
+      localStorage.setItem("auth", "true");  // Save login flag (To avoid bypass wala bug)
       navigate("/landingpage"); //It will Redirect only if backend says success
     } else {
-      alert(data.message || "Invalid credentials");
+      alert(data.message || "Invalid credentials, Please Try Again.");
     }
   } catch (err) {
     console.error(err);
-    alert("Error connecting to server");
+    alert("Error connecting to server, Try Refreshing the page.");
   }
 };
 

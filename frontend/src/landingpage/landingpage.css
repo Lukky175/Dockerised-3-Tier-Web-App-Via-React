@@ -140,3 +140,14 @@ section.landing-section {
   from { opacity: 0.2; }
   to { opacity: 1; }
 }
+
+/* Format Output Nicely*/
+.chat-bubble.ai {
+  background: rgba(40, 40, 40, 0.8);
+  border-radius: 10px;
+  padding: 0;
+}
+
+.prose h3 {
+  background: linear-gradient(90deg, rgba(20,83,45,0.25), rgba(17,24,39,0.1));
+}
