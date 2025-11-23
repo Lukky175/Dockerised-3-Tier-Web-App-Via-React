@@ -20,7 +20,7 @@ function Navbar() {
       <div className="navdiv">
         <div className="logo">
           <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-            AdaptEd
+            Research Paper Summarizer
           </Link>
         </div>
 

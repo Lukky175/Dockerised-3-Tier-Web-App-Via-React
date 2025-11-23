@@ -17,21 +17,23 @@
     background: rgba(215, 215, 215, 0.118);
     backdrop-filter: blur(10px);
     display: flex;
-    justify-content: center;
-    align-items: center;
+    /* justify-content: center; */
+    padding-left: 40px;
     z-index: 100;
 }
 
 .navdiv {
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    width: 80%;
+    align-items: center;
+    justify-content: space-between; /* pushes ul to right */
+    width: 100%; /* full width */
+    padding-right: 40px; /* optional: to add spacing on right */
 }
 
 .logo {
-    font-size: 1.8em;
-    font-weight: bold;
+    font-family: 'Segoe UI';
+    font-size: 1.6em;
+    font-weight: 400;
     color: white;
     text-align: left;
     flex-grow: 1;
@@ -64,6 +66,8 @@
 .navdiv ul li a:hover {
     color: #f1f1f1;
     text-decoration: underline;
+    transform: scale(1.1);
+
 }
 
 .navdiv ul li a {
@@ -119,3 +123,14 @@
         width: 100%;
     }
 }
+
+/* FORCE all navbar links to stay white */
+.navbar a {
+    color: white !important;
+}
+
+/* FORCE links inside buttons to stay white */
+.navbar button a {
+    color: white !important;
+}
+
