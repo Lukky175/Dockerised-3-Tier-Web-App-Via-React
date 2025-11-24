@@ -22,5 +22,6 @@
     "npm": "^11.6.2",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^5.4.394"
-  }
+  },
+  "devDependencies": {}
 }
